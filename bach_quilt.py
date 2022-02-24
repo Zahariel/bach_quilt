@@ -1,7 +1,8 @@
+import math
 from collections import defaultdict
 
 import drawSvg as svg
-from music import REV_COLOR, parse_music, MusicRow
+from music import NOTE_BOTTOM, NOTE_HEIGHT, REV_COLOR, ROW_HEIGHT, parse_music, MusicRow
 import data
 
 DEBUG=False
@@ -55,8 +56,9 @@ for i, (g, w) in enumerate(border_groups):
         inner_group.append(svg.Text(str(i), 1, 1, 2))
 
 
+# given units (half-inches), round up to nearest half-strip
 def strips(strip_units):
-    return round(strip_units / 80) + 1
+    return (round(strip_units / 40) + 1)/2
 
 if not DEBUG:
     _, _, _, prelude = parse_music(data.prelude)
@@ -88,22 +90,38 @@ if not DEBUG:
     for g in border_rows:
         g.center()
 
-    yardage_dict = defaultdict(float)
-    prelude.yardage(yardage_dict)
-    allemande.yardage(yardage_dict)
-    courante.yardage(yardage_dict)
-    sarabande.yardage(yardage_dict)
-    minuet_1.yardage(yardage_dict)
-    minuet_2.yardage(yardage_dict)
-    gigue.yardage(yardage_dict)
+    yardage_accumulator = defaultdict(float)
+    prelude.yardage(yardage_accumulator)
+    allemande.yardage(yardage_accumulator)
+    courante.yardage(yardage_accumulator)
+    sarabande.yardage(yardage_accumulator)
+    minuet_1.yardage(yardage_accumulator)
+    minuet_2.yardage(yardage_accumulator)
+    gigue.yardage(yardage_accumulator)
 
-    for color, strip_units in yardage_dict.items():
+    yardage_dict = defaultdict(lambda: defaultdict(float))
+    white_dict = defaultdict(float)
+
+    for (color, octave), strip_units in yardage_accumulator.items():
         num_strips = strips(strip_units)
-        print(REV_COLOR[color], num_strips, (num_strips * 2.5) / 36)
+        yardage_dict[REV_COLOR[color]][octave] = num_strips
+        if color == "#ffffff":
+            white_dict[ROW_HEIGHT + 1] += num_strips
+        else:
+            white_dict[NOTE_BOTTOM[REV_COLOR[color], octave] + 1] += num_strips
+            white_dict[ROW_HEIGHT - NOTE_BOTTOM[REV_COLOR[color], octave] - NOTE_HEIGHT + 1] += num_strips
 
-    white_units = sum(yardage_dict.values())
-    white_strips = strips(white_units)
-    print("white", white_strips, (white_strips * 4) / 36)
+    print("Stripsets:")
+    for note, d in sorted(yardage_dict.items()):
+        for octave, strips in sorted(d.items()):
+            print(note, octave, strips)
+        print(note, math.ceil(sum(d.values())) * 2.5 / 36, "yards")
+
+    print("White strips:")
+    del white_dict[1]
+    for width, strips in sorted(white_dict.items()):
+        print(width/2, strips)
+    print(sum(width / 2 * math.ceil(strips) / 36 for width, strips in white_dict.items()), "yards")
 
 drawing.saveSvg("quilt_render.svg")
 
