@@ -58,7 +58,10 @@ for i, (g, w) in enumerate(border_groups):
 
 # given units (half-inches), round up to nearest half-strip
 def strips(strip_units):
-    return (round(strip_units / 40) + 1)/2
+    # don't bother making even half a stripset for less than 6 inches
+    if strip_units < 12:
+        return 0
+    return (math.ceil(strip_units / 40))/2
 
 if not DEBUG:
     _, _, _, prelude = parse_music(data.prelude)
@@ -99,29 +102,36 @@ if not DEBUG:
     minuet_2.yardage(yardage_accumulator)
     gigue.yardage(yardage_accumulator)
 
-    yardage_dict = defaultdict(lambda: defaultdict(float))
+    yardage_dict = defaultdict(dict)
     white_dict = defaultdict(float)
-
+    white_fullheight = 0
     for (color, octave), strip_units in yardage_accumulator.items():
         num_strips = strips(strip_units)
-        yardage_dict[REV_COLOR[color]][octave] = num_strips
         if color == "#ffffff":
-            white_dict[ROW_HEIGHT + 1] += num_strips
+            white_fullheight += strip_units + 1
         else:
+            yardage_dict[REV_COLOR[color]][octave] = (strip_units, num_strips)
             white_dict[NOTE_BOTTOM[REV_COLOR[color], octave] + 1] += num_strips
             white_dict[ROW_HEIGHT - NOTE_BOTTOM[REV_COLOR[color], octave] - NOTE_HEIGHT + 1] += num_strips
 
     print("Stripsets:")
     for note, d in sorted(yardage_dict.items()):
-        for octave, strips in sorted(d.items()):
-            print(note, octave, strips)
-        print(note, math.ceil(sum(d.values())) * 2.5 / 36, "yards")
+        for octave, (u, s) in sorted(d.items()):
+            print(note, octave, u/2, s)
+        total_strips = int(math.ceil(sum(s for _, s in d.values())))
+        print(note, total_strips, "strips", total_strips * 2.5 / 36, "yards")
 
     print("White strips:")
-    del white_dict[1]
-    for width, strips in sorted(white_dict.items()):
-        print(width/2, strips)
-    print(sum(width / 2 * math.ceil(strips) / 36 for width, strips in white_dict.items()), "yards")
+    del white_dict[1] # no half-inch strips please
+    # add the movement separators
+    white_fullheight += MOVEMENT_SEPARATOR * 9
+    # add the centering
+    for row in main_rows:
+        white_fullheight += (row.max_width - row.right) * 2
+    white_dict[ROW_HEIGHT + 1] = strips(white_fullheight)
+    for width, s in sorted(white_dict.items()):
+        print(width/2, s)
+    print(sum(width / 2 * math.ceil(s) / 36 for width, s in white_dict.items()), "yards")
 
 drawing.saveSvg("quilt_render.svg")
 
