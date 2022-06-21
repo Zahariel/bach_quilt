@@ -2,7 +2,7 @@ import math
 from collections import defaultdict
 
 import drawSvg as svg
-from music2 import REV_COLOR, parse_music, MusicRow
+from music2 import NOTE_BOTTOM, REV_COLOR, ROW_HEIGHT, parse_music, MusicRow
 import data
 
 DEBUG=False
@@ -105,33 +105,33 @@ if not DEBUG:
     yardage_dict = defaultdict(dict)
     white_dict = defaultdict(float)
     white_fullheight = 0
-    for (color, octave), strip_units in yardage_accumulator.items():
+    for (color, octave, height), strip_units in yardage_accumulator.items():
         num_strips = strips(strip_units/2)
         if color == "#ffffff":
             white_fullheight += strip_units + 1
         else:
-            yardage_dict[REV_COLOR[color]][octave] = (strip_units/2, num_strips)
-            # white_dict[NOTE_BOTTOM[REV_COLOR[color], octave] + 1] += num_strips
-            # white_dict[ROW_HEIGHT - NOTE_BOTTOM[REV_COLOR[color], octave] - NOTE_HEIGHT + 1] += num_strips
+            yardage_dict[REV_COLOR[color]][octave, height] = (strip_units/2, num_strips)
+            white_dict[NOTE_BOTTOM[height][REV_COLOR[color], octave] + 1] += num_strips
+            white_dict[ROW_HEIGHT - NOTE_BOTTOM[height][REV_COLOR[color], octave] - height + 1] += num_strips
 
     print("Stripsets:")
     for note, d in sorted(yardage_dict.items()):
-        for octave, (i, s) in sorted(d.items()):
-            print(note, octave, i, s)
-        total_strips = int(math.ceil(sum(s for _, s in d.values())))
-        print(note, total_strips, "strips", total_strips * 2.5 / 36, "yards")
+        for (octave, height), (i, s) in sorted(d.items()):
+            print(note, height, octave, i, s)
+        total_width = int(math.ceil(sum((h+1)/2 * s for (_, h), (_, s) in d.items())))
+        print(note, total_width / 36, "yards")
 
-    # print("White strips:")
-    # del white_dict[1] # no half-inch strips please
-    # # add the movement separators
-    # white_fullheight += MOVEMENT_SEPARATOR * 9 + 5
-    # # add the centering
-    # for row in main_rows:
-    #     white_fullheight += (row.max_width - row.right) * 2 + 2
-    # white_dict[ROW_HEIGHT + 1] = strips(white_fullheight/2)
-    # for width, s in sorted(white_dict.items()):
-    #     print(width/2, s)
-    # print(sum(width / 2 * math.ceil(s) / 36 for width, s in white_dict.items()), "yards")
+    print("White strips:")
+    del white_dict[1] # no half-inch strips please
+    # add the movement separators
+    white_fullheight += MOVEMENT_SEPARATOR * 9 + 5
+    # add the centering
+    for row in main_rows:
+        white_fullheight += (row.max_width - row.right) * 2 + 2
+    white_dict[ROW_HEIGHT + 1] = strips(white_fullheight/2)
+    for width, s in sorted(white_dict.items()):
+        print(width/2, s)
+    print(sum(width / 2 * math.ceil(s) / 36 for width, s in white_dict.items()), "yards")
 
     print("Gray strips:")
     gray_half_length = (num_rows - 1) * (main_width + 0.5)

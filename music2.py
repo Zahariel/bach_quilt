@@ -465,7 +465,7 @@ class Note(Drawable):
         return x + self.duration * scale, row
 
     def yardage(self, yardage_dict):
-        yardage_dict[COLOR[self.pitch], self.octave] += self.duration + 1
+        yardage_dict[COLOR[self.pitch], self.octave, self.height] += self.duration + 1
 
     def bottom_y(self):
         if self.pitch == "R": return ROW_HEIGHT - self.height
@@ -584,7 +584,7 @@ class Trill(Note):
 
     def yardage(self, yardage_dict):
         super(Trill, self).yardage(yardage_dict)
-        yardage_dict[COLOR[self.first], self.octave + (1 if self.octave_adj else 0)] += self.duration + 1
+        yardage_dict[COLOR[self.first], self.octave + (1 if self.octave_adj else 0), self.height] += self.duration + 1
 
     def top_y(self):
         return NOTE_BOTTOM[self.height][self.first, self.octave + 1 if self.octave_adj else self.octave] + self.height
