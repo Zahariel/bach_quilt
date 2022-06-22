@@ -421,9 +421,9 @@ class MusicRow:
         self.max_width = max_width
         self.translate_y = translate_y
         self.right = 0
+        self.measure_start = 0
         if self.translate_y != 0:
             self.group.args["transform"] = f"translate(0, {self.translate_y})"
-
 
     def center(self):
         self.group.args["transform"] = f"translate({(self.max_width-self.right)/2},{self.translate_y})"
@@ -483,7 +483,7 @@ class NextLine(Drawable):
     def __init__(self):
         pass
 
-    def draw(self, rows:typing.Sequence[MusicRow], x, row, *, scale=0.5, **kwargs):
+    def draw(self, rows:typing.Sequence[MusicRow], x, row, *, scale=DEFAULT_SCALE, **kwargs):
         return 0, row + 1
 
     def __repr__(self):
@@ -495,10 +495,27 @@ class BarLine(Drawable):
         pass
 
     def draw(self, rows:typing.Sequence[MusicRow], x, row, *, scale=DEFAULT_SCALE,
-             separate_measures=0, measure_width=None, **kwargs):
+             separate_measures=0, measure_width=None,
+             measure_border=None, **kwargs):
         if measure_width and x + (separate_measures + measure_width) * scale > rows[row].max_width + scale/2:
-            return 0, row+1
-        return x + separate_measures * scale, row
+            result_x, result_row = 0, row+1
+        else:
+            result_x, result_row = x + separate_measures * scale, row
+
+        if measure_border:
+            left = rows[row].measure_start
+            rows[row].group.append(svg.Rectangle(left-0.05, -0.05, x-left+0.1, ROW_HEIGHT*scale+0.1, fill='none', stroke=measure_border, stroke_width=0.1))
+            # dx = left + scale*2
+            # while dx < x:
+            #     rows[row].group.append(svg.Line(dx, 0, dx, ROW_HEIGHT*scale, stroke=measure_border, stroke_width=0.05))
+            #     dx += scale*2
+            # dy = scale*2
+            # while dy < ROW_HEIGHT * scale:
+            #     rows[row].group.append(svg.Line(left, dy, x, dy, stroke=measure_border, stroke_width=0.05))
+            #     dy += scale*2
+
+        rows[result_row].measure_start = result_x
+        return result_x, result_row
 
     def __repr__(self):
         return "BarLine()"
