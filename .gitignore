@@ -1,3 +1,4 @@
-/*.pdf
-/*.svg
+/**/*.pdf
+/**/*.svg
 /reference/
+/blocks/

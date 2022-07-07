@@ -456,12 +456,14 @@ class Note(Drawable):
     def length(self):
         return self.duration
 
-    def draw(self, rows:typing.Sequence[MusicRow], x, row, *, scale=DEFAULT_SCALE, **kwargs):
+    def draw(self, rows:typing.Sequence[MusicRow], x, row, *, scale=DEFAULT_SCALE, measure_border=None, **kwargs):
         if self.pitch != "R":
             dy = self.bottom_y() * scale
             rect = svg.Rectangle(x, dy, self.duration * scale, self.height * scale, fill=COLOR[self.pitch])
             rows[row].group.append(rect)
             rows[row].right = x + self.duration * scale
+            if measure_border:
+                rows[row].group.append(svg.Text(self.pitch + str(self.octave), 0.5*scale, x, ROW_HEIGHT * scale + 0.15))
         return x + self.duration * scale, row
 
     def yardage(self, yardage_dict):
@@ -505,16 +507,17 @@ class BarLine(Drawable):
         if measure_border:
             left = rows[row].measure_start
             rows[row].group.append(svg.Rectangle(left-0.05, -0.05, x-left+0.1, ROW_HEIGHT*scale+0.1, fill='none', stroke=measure_border, stroke_width=0.1))
-            # dx = left + scale*2
-            # while dx < x:
-            #     rows[row].group.append(svg.Line(dx, 0, dx, ROW_HEIGHT*scale, stroke=measure_border, stroke_width=0.05))
-            #     dx += scale*2
-            # dy = scale*2
-            # while dy < ROW_HEIGHT * scale:
-            #     rows[row].group.append(svg.Line(left, dy, x, dy, stroke=measure_border, stroke_width=0.05))
-            #     dy += scale*2
+            dx = left + scale
+            while dx < x:
+                rows[row].group.append(svg.Line(dx, 0, dx, ROW_HEIGHT*scale, stroke=measure_border, stroke_width=0.05))
+                dx += scale
+            dy = scale
+            while dy < ROW_HEIGHT * scale:
+                rows[row].group.append(svg.Line(left, dy, x, dy, stroke=measure_border, stroke_width=0.05))
+                dy += scale
 
-        rows[result_row].measure_start = result_x
+        if (result_row < len(rows)):
+            rows[result_row].measure_start = result_x
         return result_x, result_row
 
     def __repr__(self):
@@ -565,10 +568,10 @@ class Repeat(BarLine):
         rows[row].right = x
         x, row = super().draw(rows, x, row, scale=scale, **kwargs)
         if self.right:
-            if x == 0:
-                # barline forced a new line
-                rows[row].group.append(svg.Rectangle(x, 0, 2*scale, ROW_HEIGHT*scale, fill="#000000"))
-                x += 2*scale
+            # if x == 0:
+            #     # barline forced a new line
+            #     rows[row].group.append(svg.Rectangle(x, 0, 2*scale, ROW_HEIGHT*scale, fill="#000000"))
+            #     x += 2*scale
             rows[row].group.append(svg.Rectangle(x, 3*scale, scale, scale, fill="#000000"))
             rows[row].group.append(svg.Rectangle(x, (ROW_HEIGHT-4)*scale, scale, scale, fill="#000000"))
             x += scale

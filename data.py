@@ -20,11 +20,11 @@ prelude = "T4/4 L1 O1 G > D B A B D B D < G > D B A B D B D | < G > E > C < B > 
           "> C < A B A > C < A A A B A A A B A G A | A A G A A A F# A G A F# A G A E A | " \
           "F# A D E F D F# D G D G# D A D Bb D | B D > C < D > C# < D > D < D > Eb < D > E < D > F < D > F# < D | " \
           "> G < B D B > G < B > G < B > G < B D B > G < B > G < B | > G < A D A > G < A > G < A > G < A D A > G < A > G < A | " \
-          "> F# C < D > C F# C F# C F# C < D > C F# C F# C | [ < < G4 > B16 > G16 ] "
+          "> F# C < D > C F# C F# C F# C < D > C F# C F# C | [ < < G4 > B16 > G16 ] | "
 
 allemande = "T4/4 L1 O2 R3 B | [ O1 G2 > D5 B5 ] A G F# G D E F# G A B > C | D < B G F# G E D C < B > C D E F# G A B | " \
             "> C < A G F# G E F# G < A > D F# G A B > C < A | B G G D D < B B G G3 > B > C < B A G | " \
-            "A B > C < A G F# G A D#3 > C < B A | G F# G E E < B B G G E E3 B > E G F# A | " \
+            "A B > C < A G F# G A D#3 > C < B A G F# | G E E < B B G G E E3 B > E G F# A | " \
             "G F# E F# G > C# < G F# G > C# < E F# G E < A > G | F#2 D E F# D G E F# D F# G A B > C < A | " \
             "B D < G > D B G A F# G E G A B > C# D < B | > C# < E < G > E > C# < A B > D C# < A > D < B > C# < A > E < G | " \
             "F#3 > D < A G F# E D A G E F# D A C | < B3 > G D C < B A G > D C < A B G > D < F# | " \
@@ -52,7 +52,7 @@ courante = "T3/4 L1 O2 R2 G2 | G2 D2 < G2 > B > C D C < B A | B2 D2 < G2 > G A B
            "C# G A G A G C# G C# G A G | C F# A F# A F# C F# C F# A F# | < B > D E F < G > F E D E > D C < B | " \
            "F# A B > C < D > C < B A B2 < G2 | C2 > B A > C < B A G D2 F#2 | < G A G B G A G > C < G A G > D < | " \
            "G A G > E < G A G > F# < G A G > G | > C < B A G F# E D > C < ~C'~B3 A | > D C D < B > D C D < B E > D C < B | " \
-           "> C < B > C < A > C < B > C < A D > C < B A | B A B G C B A G D2 F#2 [ < G10 > G10 ] :/"
+           "> C < B > C < A > C < B > C < A D > C < B A | B A B G C B A G D2 F#2 | [ < G10 > G10 ] :/"
 
 sarabande = "T3/2 L2 O1 [ G4 > D8 B8 ] [ < G4 > E8 > C12 ] < B4 | F# A B > C < < [ G4 > D8 ~C'~B8 ] A4 G4 | " \
             "> D4 < F4 E7 D1 C1 < B1 > C4 E4 | F# > C < B G ~G~F#8 E4 D4 | " \
