@@ -598,7 +598,7 @@ class Trill(Note):
         first_bottom = NOTE_BOTTOM[self.height][self.first, self.octave + 1 if self.octave_adj else self.octave]
         for dx in range(self.duration):
             for dy in range(self.height):
-                if (dx + dy) % 2 != (first_bottom+self.height) % 2 or (dy == self.height-1 and first_bottom != self.bottom_y()):
+                if (dx + dy) % 2 != (self.height) % 2 or (dy == self.height-1 and first_bottom != self.bottom_y()):
                     rows[row].group.append(svg.Rectangle(x + dx*scale, (first_bottom + dy)*scale, scale, scale, fill=COLOR[self.first]))
         return new_x, new_row
 
