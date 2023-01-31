@@ -527,9 +527,9 @@ class BarLine(Drawable):
 TIME_BARS = {
     1: [[(3,4)]],
     2: [[(0,3), (7,3)]],
-    3: [[(0,2), (4,2), (8,2)]],
+    3: [[(2,1), (5,1), (8,1)]],
     4: [[(0,1), (3,1), (6,1), (9,1)]],
-    6: [[(2,2), (6,2)], [(0,2), (8,2)], [(2,2), (6,2)]]
+    6: [[(2,1), (7,1)], [(1,1), (8,1)], [(2,1), (7,1)]]
 }
 
 
@@ -542,7 +542,7 @@ class TimeSignature(Drawable):
         width = 16 // self.bottom
         for column in TIME_BARS[self.top]:
             for start, height in column:
-                rect = svg.Rectangle(x, start*scale, width*scale, height*scale, fill="#000000")
+                rect = svg.Rectangle(x, start*scale, width*scale, height*scale, fill="#666666")
                 rows[row].group.append(rect)
             x += width*scale
         rows[row].right = x
@@ -560,11 +560,11 @@ class Repeat(BarLine):
 
     def draw(self, rows:typing.Sequence[MusicRow], x, row, *, scale=0.5, **kwargs):
         if self.left:
-            rows[row].group.append(svg.Rectangle(x, 3*scale, scale, scale, fill="#000000"))
-            rows[row].group.append(svg.Rectangle(x, (ROW_HEIGHT - 4)*scale, scale, scale, fill="#000000"))
+            rows[row].group.append(svg.Rectangle(x, 3*scale, scale, scale, fill="#666666"))
+            rows[row].group.append(svg.Rectangle(x, (ROW_HEIGHT - 4)*scale, scale, scale, fill="#666666"))
         x += scale
-        rows[row].group.append(svg.Rectangle(x, 0, 2*scale, ROW_HEIGHT*scale, fill="#000000"))
-        x += 2*scale
+        rows[row].group.append(svg.Rectangle(x, 0, scale, ROW_HEIGHT*scale, fill="#666666"))
+        x += scale
         rows[row].right = x
         x, row = super().draw(rows, x, row, scale=scale, **kwargs)
         if self.right:
@@ -572,15 +572,15 @@ class Repeat(BarLine):
             #     # barline forced a new line
             #     rows[row].group.append(svg.Rectangle(x, 0, 2*scale, ROW_HEIGHT*scale, fill="#000000"))
             #     x += 2*scale
-            rows[row].group.append(svg.Rectangle(x, 3*scale, scale, scale, fill="#000000"))
-            rows[row].group.append(svg.Rectangle(x, (ROW_HEIGHT-4)*scale, scale, scale, fill="#000000"))
+            rows[row].group.append(svg.Rectangle(x, 3*scale, scale, scale, fill="#666666"))
+            rows[row].group.append(svg.Rectangle(x, (ROW_HEIGHT-4)*scale, scale, scale, fill="#666666"))
             x += scale
             rows[row].right = x
-        else:
-            if x != 0:
-                # leave space for the right side even though it's not there, so that it ends up an even number
-                # of blocks wide
-                x += scale
+        # else:
+        #     if x != 0:
+        #         # leave space for the right side even though it's not there, so that it ends up an even number
+        #         # of blocks wide
+        #         x += scale
         return x, row
 
     def __repr__(self):

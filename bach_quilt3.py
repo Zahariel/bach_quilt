@@ -7,44 +7,63 @@ import data
 
 DEBUG=False
 
-num_rows = 16
 
-main_row_spacing = 0.5
-main_height = num_rows * (5 + main_row_spacing) - main_row_spacing
+center_width = 12
+center_height = 24
+rings = 6
+
+main_width = center_width + 12 * rings
+main_height = center_height + 12 * rings
+
 # padding, border 1, margin, main border, margin, border 2
 main_offset = (1 + 1 + 1 + 5 + 1.5 + 1)
-total_height = main_height + main_offset * 2
-main_width = 80
-total_width = main_width + main_offset * 2
+
+total_width = main_width + 2 * main_offset
+total_height = main_height + 2 * main_offset
 
 drawing = svg.Drawing(total_width, total_height)
 drawing.setRenderSize(f"{total_width / 10}in", f"{total_height / 10}in")
 
 # draw outside border
 drawing.append(svg.Rectangle(0.5, 0.5, total_width - 1, total_height - 1, stroke_width=1, stroke="#666666", fill="#ffffff"))
-
 # draw inside border
 drawing.append(svg.Rectangle(main_offset - 1.5, main_offset - 1.5, main_width + 3, main_height + 3, stroke_width=1, stroke="#666666", fill="#ffffff"))
+
 
 main_group = svg.Group(transform=f"translate({main_offset}, {-main_offset})")
 drawing.append(main_group)
 
-main_rows = [MusicRow(svg.Group(), main_width, i * (5 + main_row_spacing) - main_height + 5) for i in range(num_rows)]
+main_group.append(svg.Rectangle(6 * rings + 0.5, 6 * rings + 0.5, center_width - 1, center_height - 1, stroke_width=1, stroke="#666666", fill="#ffffff"))
 
-for i, g in enumerate(main_rows):
-    main_group.append(g.group)
-    if DEBUG:
-        g.group.append(svg.Rectangle(.25, .25, main_width - 0.5, 4.5, stroke_width=.5, stroke="#ff0000", fill="#ffffff"))
-        g.group.append(svg.Text(str(i), 1, 1, 2))
+main_rows = []
+
+for i in range(rings):
+    top, top_width = svg.Group(transform=f"translate({i * 6},{i * 6 - main_height + 5})"), main_width - i * 12 - 6
+    right, right_width = svg.Group(transform=f"translate({main_width - 5 - i * 6},{i * 6 - main_height}) rotate(90)"), main_height - i * 12 - 6
+    bottom, bottom_width = svg.Group(transform=f"translate({main_width - i * 6},{-5 - i * 6}) rotate(180)"), main_width - i * 12 - 6
+    left, left_width = svg.Group(transform=f"translate({5 + i * 6},{-i * 6}) rotate(270)"), main_height - i * 12 - 6
+
+    for g, w in [(top, top_width), (right, right_width), (bottom, bottom_width), (left, left_width)]:
+        main_group.append(g)
+        inner = svg.Group()
+        g.append(inner)
+        main_rows.append(MusicRow(inner, w, 0))
+        if DEBUG:
+            inner.append(svg.Rectangle(.25, .25, w - 0.5, 4.5, stroke_width=.5, stroke="#ff0000", fill="#ffffff"))
+            inner.append(svg.Text(str(i), 1, 1, 2))
+
 
 # for i in range(1,num_rows):
 #     main_group.append(svg.Rectangle(0, i*5.5-0.5, main_width, 0.5, fill="#666666"))
 
+border_gap = 24
+
 border_groups = [
-    (svg.Group(transform=f"translate({main_offset - 3},{2 - main_offset}) rotate(270)"), main_height+4),
-    (svg.Group(transform=f"translate({main_offset - 2},{7.5-total_height})"), main_width+4),
+    (svg.Group(transform=f"translate({main_offset + (main_width + border_gap)/2},{7.5-total_height})"), (main_width+4 - border_gap)/2),
     (svg.Group(transform=f"translate({total_width - main_offset + 3},{main_offset - total_height - 2}) rotate(90)"), main_height+4),
     (svg.Group(transform=f"translate({total_width - main_offset + 2},{-main_offset + 3}) rotate(180)"), main_width+4),
+    (svg.Group(transform=f"translate({main_offset - 3},{2 - main_offset}) rotate(270)"), main_height+4),
+    (svg.Group(transform=f"translate({main_offset - 2},{7.5-total_height})"), (main_width+4 - border_gap)/2),
 ]
 
 border_rows = []
@@ -63,33 +82,6 @@ corner_groups = [
     svg.Group(transform=f"translate({total_width - 1},{-main_offset + 2}) rotate(180)"),
     svg.Group(transform=f"translate({main_offset - 2},{-1}) rotate(270)"),
 ]
-
-for i, g in enumerate(corner_groups):
-    drawing.append(g)
-    if DEBUG:
-        g.append(svg.Rectangle(.25, .25, main_offset - 3.5, main_offset - 3.5, stroke_width=.5, stroke="#ff0000", fill="#ffffff"))
-        g.append(svg.Text(str(i), 1, 1, 2))
-    else:
-        g.append(svg.Lines(
-            3, 3.5,
-            3, 5,
-            2.5, 5,
-            2.5, 5.5,
-            4.5, 5.5,
-            4.5, 3,
-            2, 0.5,
-            3, 0.5,
-            5.5, 3,
-            5.5, 5.5,
-            5, 6,
-            2.5, 6,
-            1.5, 5,
-            1.5, 3.5,
-            close=True,
-            fill=COLOR["F"]
-        ))
-        g.append(svg.Rectangle(6.5, 5, 0.5, 0.5, fill=COLOR["F"]))
-        g.append(svg.Rectangle(6.5, 3, 0.5, 0.5, fill=COLOR["F"]))
 
 
 # given inches, round up to nearest half-strip
@@ -157,19 +149,19 @@ if not DEBUG:
         overall_width = int(math.ceil(sum((h+1)/2 * s for (_, h), (_, s) in d.items())))
         print(note, overall_width / 36, "yards")
 
-    print("White strips:")
-    del white_dict[1] # no half-inch strips please
-    # add the movement separators
-    white_fullheight += MOVEMENT_SEPARATOR * 9 + 5
-    # add the row separators
-    white_dict[2] += strips((num_rows - 1) * (main_width + 2))
-    # add the centering
-    for row in main_rows:
-        white_fullheight += (row.max_width - row.right) * 2 + 6
-    white_dict[ROW_HEIGHT + 1] = strips(white_fullheight/2)
-    for width, s in sorted(white_dict.items()):
-        print(width/2, s)
-    print(sum(width / 2 * math.ceil(s) / 36 for width, s in white_dict.items()), "yards")
+    # print("White strips:")
+    # del white_dict[1] # no half-inch strips please
+    # # add the movement separators
+    # white_fullheight += MOVEMENT_SEPARATOR * 9 + 5
+    # # add the row separators
+    # white_dict[2] += strips((num_rows - 1) * (main_width + 2))
+    # # add the centering
+    # for row in main_rows:
+    #     white_fullheight += (row.max_width - row.right) * 2 + 6
+    # white_dict[ROW_HEIGHT + 1] = strips(white_fullheight/2)
+    # for width, s in sorted(white_dict.items()):
+    #     print(width/2, s)
+    # print(sum(width / 2 * math.ceil(s) / 36 for width, s in white_dict.items()), "yards")
 
     print("Gray strips:")
     # gray_half_length = (num_rows - 1) * (main_width + 0.5)
@@ -191,6 +183,6 @@ if not DEBUG:
         print("border", i, row.max_width, row.right, (row.max_width - row.right)/2)
 
 print("total size", total_width-2, total_height-2)
-drawing.saveSvg("quilt_render.svg")
+drawing.saveSvg("quilt_render3.svg")
 
 
