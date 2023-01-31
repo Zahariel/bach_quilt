@@ -54,7 +54,7 @@ courante = "| T3/4 L1 O2 R2 G2 | G2 D2 < G2 > B > C D C < B A | B2 D2 < G2 > G A
            "G A G > E < G A G > F# < G A G > G | > C < B A G F# E D > C < ~C'~B3 A | > D C D < B > D C D < B E > D C < B | " \
            "> C < B > C < A > C < B > C < A D > C < B A | B A B G C B A G D2 F#2 | [ < G10 > G10 ] :/"
 
-sarabande = "| T3/2 L2 O1 [ G4 > D8 B8 ] [ < G4 > E8 > C12 ] < B4 | F# A B > C < < [ G4 > D8 ~C'~B8 ] A4 G4 | " \
+sarabande = "| | T3/2 L2 O1 [ G4 > D8 B8 ] [ < G4 > E8 > C12 ] < B4 | F# A B > C < < [ G4 > D8 ~C'~B8 ] A4 G4 | " \
             "> D4 < F4 E7 D1 C1 < B1 > C4 E4 | F# > C < B G ~G~F#8 E4 D4 | " \
             "A F# D C < B6 G B > D G A | B G E D ~D~C#6 < A1 B1 > C# D E F# | G > C# D C# D < A G F# E G F# D | " \
             "< A > D E C# D8 < D8 :/: [ D4 A4 > F#4 ] E D [ < D4 A6 > F#12 > C12 ] < B A | " \

@@ -568,10 +568,10 @@ class Repeat(BarLine):
         rows[row].right = x
         x, row = super().draw(rows, x, row, scale=scale, **kwargs)
         if self.right:
-            # if x == 0:
-            #     # barline forced a new line
-            #     rows[row].group.append(svg.Rectangle(x, 0, 2*scale, ROW_HEIGHT*scale, fill="#000000"))
-            #     x += 2*scale
+            if x == 0:
+                # barline forced a new line
+                rows[row].group.append(svg.Rectangle(x, 0, scale, ROW_HEIGHT*scale, fill="#666666"))
+                x += scale
             rows[row].group.append(svg.Rectangle(x, 3*scale, scale, scale, fill="#666666"))
             rows[row].group.append(svg.Rectangle(x, (ROW_HEIGHT-4)*scale, scale, scale, fill="#666666"))
             x += scale

@@ -8,12 +8,13 @@ import data
 DEBUG=False
 
 
-center_width = 12
-center_height = 24
+center_width = 16
+center_height = 28
 rings = 6
+ring_spacing = 0.5
 
-main_width = center_width + 12 * rings
-main_height = center_height + 12 * rings
+main_width = center_width + 2 * (5+ring_spacing) * rings
+main_height = center_height + 2 * (5+ring_spacing) * rings
 
 # padding, border 1, margin, main border, margin, border 2
 main_offset = (1 + 1 + 1 + 5 + 1.5 + 1)
@@ -33,15 +34,21 @@ drawing.append(svg.Rectangle(main_offset - 1.5, main_offset - 1.5, main_width + 
 main_group = svg.Group(transform=f"translate({main_offset}, {-main_offset})")
 drawing.append(main_group)
 
-main_group.append(svg.Rectangle(6 * rings + 0.5, 6 * rings + 0.5, center_width - 1, center_height - 1, stroke_width=1, stroke="#666666", fill="#ffffff"))
+main_group.append(svg.Rectangle((5+ring_spacing) * rings + 0.5, (5+ring_spacing) * rings + 0.5, center_width - 1, center_height - 1, stroke_width=1, stroke="#666666", fill="#ffffff"))
 
 main_rows = []
 
 for i in range(rings):
-    top, top_width = svg.Group(transform=f"translate({i * 6},{i * 6 - main_height + 5})"), main_width - i * 12 - 6
-    right, right_width = svg.Group(transform=f"translate({main_width - 5 - i * 6},{i * 6 - main_height}) rotate(90)"), main_height - i * 12 - 6
-    bottom, bottom_width = svg.Group(transform=f"translate({main_width - i * 6},{-5 - i * 6}) rotate(180)"), main_width - i * 12 - 6
-    left, left_width = svg.Group(transform=f"translate({5 + i * 6},{-i * 6}) rotate(270)"), main_height - i * 12 - 6
+    if i == 0:
+        top, top_width = svg.Group(transform=f"translate({i * (5+ring_spacing)},{i * (5+ring_spacing) - main_height + 5})"), main_width - i * 2 * (5+ring_spacing) - (5+ring_spacing)
+    else:
+        top, top_width = svg.Group(transform=f"translate({i * (5+ring_spacing) - (5+ring_spacing)},{i * (5+ring_spacing) - main_height + 5})"), main_width - i * 2 * (5+ring_spacing)
+    right, right_width = svg.Group(transform=f"translate({main_width - 5 - i * (5+ring_spacing)},{i * (5+ring_spacing) - main_height}) rotate(90)"), main_height - i * 2 * (5+ring_spacing) - (5+ring_spacing)
+    bottom, bottom_width = svg.Group(transform=f"translate({main_width - i * (5+ring_spacing)},{-5 - i * (5+ring_spacing)}) rotate(180)"), main_width - i * 2 * (5+ring_spacing) - (5+ring_spacing)
+    if i == rings - 1:
+        left, left_width = svg.Group(transform=f"translate({5 + i * (5+ring_spacing)},{-i * (5+ring_spacing)}) rotate(270)"), main_height - i * 2 * (5+ring_spacing) - (5+ring_spacing)
+    else:
+        left, left_width = svg.Group(transform=f"translate({5 + i * (5+ring_spacing)},{-i * (5+ring_spacing)}) rotate(270)"), main_height - i * 2 * (5+ring_spacing) - 2 * (5+ring_spacing)
 
     for g, w in [(top, top_width), (right, right_width), (bottom, bottom_width), (left, left_width)]:
         main_group.append(g)
@@ -56,7 +63,7 @@ for i in range(rings):
 # for i in range(1,num_rows):
 #     main_group.append(svg.Rectangle(0, i*5.5-0.5, main_width, 0.5, fill="#666666"))
 
-border_gap = 24
+border_gap = 8
 
 border_groups = [
     (svg.Group(transform=f"translate({main_offset + (main_width + border_gap)/2},{7.5-total_height})"), (main_width+4 - border_gap)/2),
@@ -104,7 +111,7 @@ if not DEBUG:
     x, y = courante.draw(main_rows, x + MOVEMENT_SEPARATOR, y)
 
     _, _, _, sarabande = parse_music(data.sarabande)
-    x, y = sarabande.draw(main_rows, x + MOVEMENT_SEPARATOR, y)
+    x, y = sarabande.draw(main_rows, x + MOVEMENT_SEPARATOR, y, measure_width=24)
 
     _, _, _, minuet_1 = parse_music(data.minuet_1)
     x, y = minuet_1.draw(main_rows, x + MOVEMENT_SEPARATOR, y)
