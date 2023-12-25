@@ -409,6 +409,7 @@ COLOR = {
     "Bb": "#660099",
     "B": "#990066",
     "R": "#ffffff",
+    "N": "#666666",
 }
 
 REV_COLOR = dict()
@@ -499,13 +500,17 @@ class BarLine(Drawable):
     def draw(self, rows:typing.Sequence[MusicRow], x, row, *, scale=DEFAULT_SCALE,
              separate_measures=0, measure_width=None,
              measure_border=None, **kwargs):
+        left = rows[row].measure_start
+        if left == rows[row].right:
+            # don't separate empty measures
+            separate_measures = 0
+            measure_border = None
         if measure_width and x + (separate_measures + measure_width) * scale > rows[row].max_width + scale/2:
             result_x, result_row = 0, row+1
         else:
             result_x, result_row = x + separate_measures * scale, row
 
         if measure_border:
-            left = rows[row].measure_start
             rows[row].group.append(svg.Rectangle(left-0.05, -0.05, x-left+0.1, ROW_HEIGHT*scale+0.1, fill='none', stroke=measure_border, stroke_width=0.1))
             dx = left + scale
             while dx < x:
@@ -548,6 +553,11 @@ class TimeSignature(Drawable):
         rows[row].right = x
         return x, row
 
+    def yardage(self, yardage_dict):
+        for column in TIME_BARS[self.top]:
+            for start, height in column:
+                yardage_dict[COLOR["N"], 1, height] += 16 // self.bottom + 1
+
     def __repr__(self):
         return f"TimeSignature({self.top}, {self.bottom})"
 
@@ -582,6 +592,14 @@ class Repeat(BarLine):
         #         # of blocks wide
         #         x += scale
         return x, row
+
+    def yardage(self, yardage_dict):
+        if self.left:
+            yardage_dict[COLOR["N"], 1, 1] += 2
+        if self.right:
+            yardage_dict[COLOR["N"], 1, 1] += 2
+        # assume both sides get drawn because it's impossible to figure it out right now
+        yardage_dict[COLOR["N"], 1, 1] += 2 * (ROW_HEIGHT + 1)
 
     def __repr__(self):
         return f"Repeat({self.left}, {self.right})"

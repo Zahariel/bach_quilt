@@ -11,13 +11,13 @@ pages = []
 blocks_rows = []
 BLOCKS_ROWS_PER_PAGE = 4
 BLOCKS_SCALE = 1/3
-blocks_width = 7.6 / BLOCKS_SCALE
+blocks_width = 7.5 / BLOCKS_SCALE
 blocks_height = 10 / BLOCKS_SCALE
 NUM_PAGES = 25
 for page in range(NUM_PAGES):
     page_drawing = svg.Drawing(8/BLOCKS_SCALE, blocks_height, origin=(-1, 0))
     page_drawing.setRenderSize("8in", "10in")
-    page_drawing.append(svg.Rectangle(-1, 0, 8/BLOCKS_SCALE, blocks_height, fill="#ffffff"))
+    page_drawing.append(svg.Rectangle(-1, 0, 8/BLOCKS_SCALE, blocks_height, fill="#ffffff", stroke="#000000", stroke_width=0.1))
     pages.append(page_drawing)
     page_rows = [MusicRow(svg.Group(), blocks_width, i * 6 - blocks_height + 10) for i in range(BLOCKS_ROWS_PER_PAGE)]
     blocks_rows += page_rows

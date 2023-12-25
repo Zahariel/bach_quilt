@@ -44,7 +44,7 @@ courante = "| T3/4 L1 O2 R2 G2 | G2 D2 < G2 > B > C D C < B A | B2 D2 < G2 > G A
            "F# A > D < F# G2 < B2 D2 > F#2 | [ < G6 > G6 ] B A G F# E D | > E2 C#2 < A2 B > C# D < F# E D | " \
            "< A2 > > D2 ~D~C#2 < B A > D < A B F# | G F# G E G F# G E < A > G F# E | F# E F# D F# E F# D < G > F# E D | " \
            "> D C# < B A > D2 C# < B A G F# E | D E D F# D E D G D E D A | D E D B D E D > C# < D E D > D | " \
-           "< G F# E D C# < B A > G ~G~F#3 E | A G B A G F# E D < A2 > C#2 < D10 :/: " \
+           "< G F# E D C# < B A > G ~G~F#3 E | A G B A G F# E D < A2 > C#2 < | D10 :/: " \
            "> A2 | A2 F#2 D2 E F# G F# E D | > D2 < F#2 C2 < B > C D C < B A | B > G A B > C < B A G F#2 > D2 | " \
            "< B2 G2 < G2 > B A > C < B A G | A2 F#2 D# A B > C < B A G F# | G2 E2 < E2 > G F# A G F# E | " \
            "F E F A F E F A > C < B > C < A | > ~E~D#5 C < B A G F# A D# | < G2 > B2 A G F# E < B2 > D#2 | " \
@@ -55,7 +55,7 @@ courante = "| T3/4 L1 O2 R2 G2 | G2 D2 < G2 > B > C D C < B A | B2 D2 < G2 > G A
            "> C < B > C < A > C < B > C < A D > C < B A | B A B G C B A G D2 F#2 | [ < G10 > G10 ] :/"
 
 sarabande = "| | T3/2 L2 O1 [ G4 > D8 B8 ] [ < G4 > E8 > C12 ] < B4 | F# A B > C < < [ G4 > D8 ~C'~B8 ] A4 G4 | " \
-            "> D4 < F4 E7 D1 C1 < B1 > C4 E4 | F# > C < B G ~G~F#8 E4 D4 | " \
+            "> D4 < F4 E5 D1 C1 < B1 > C4 E4 | F# > C < B G ~G~F#8 E4 D4 | " \
             "A F# D C < B6 G B > D G A | B G E D ~D~C#6 < A1 B1 > C# D E F# | G > C# D C# D < A G F# E G F# D | " \
             "< A > D E C# D8 < D8 :/: [ D4 A4 > F#4 ] E D [ < D4 A6 > F#12 > C12 ] < B A | " \
             "[ < G1 > D B ] F# G E [ < A6 > ~E~D#6 ] E F# G A B | D# A B > C < B4 A G F# E A F# | " \
@@ -77,7 +77,7 @@ minuet_2 = "| T3/4 L2 O2 Bb A Bb D Eb < G | F4 > A4 D4 | G F# G < Bb > C < Eb | 
            "< < F# A > C Eb D C | < B > D G A B G | C B A G D F# | < G12 :/"
 
 
-gigue = "| T6/8 L2 O2 D | G D E E C D | D G D < B G > D | G1 A1 B A A1 B1 > C < B | [ < G > D6 ~C'~B6 ] [ D4 A4 ] A | " \
+gigue = "| T6/8 L2 O2 R4 D | G D E E C D | D G D < B G > D | G1 A1 B A A1 B1 > C < B | [ < G > D6 ~C'~B6 ] [ D4 A4 ] A | " \
         "B F# G G E G | A E F# F# D F# | G B G E < B > D | C# E A < A4 > E | F E G G F A | A G Bb Bb A G | " \
         "F E D < A > D C# | D < A F# D4 :/: > A | A F# G G E F# | F#1 G1 A F# D > C < B | B G A A F# G | " \
         "G1 A1 B G E > D C | < A > D C < D > C < B | G > C < B C B A | G F# E < B > E D# | E < B G E4 > G | " \

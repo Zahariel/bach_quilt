@@ -1,4 +1,5 @@
 import math
+import typing
 from collections import defaultdict
 
 import drawSvg as svg
@@ -16,8 +17,15 @@ ring_spacing = 0.5
 main_width = center_width + 2 * (5+ring_spacing) * rings
 main_height = center_height + 2 * (5+ring_spacing) * rings
 
+inner_padding = 1
+inner_border = 1
+inner_margin = 1
+border_row_height = ROW_HEIGHT//2
+outer_margin = 1.5
+outer_border = 1
+
 # padding, border 1, margin, main border, margin, border 2
-main_offset = (1 + 1 + 1 + 5 + 1.5 + 1)
+main_offset = (inner_padding + inner_border + inner_margin + border_row_height + outer_margin + outer_border)
 
 total_width = main_width + 2 * main_offset
 total_height = main_height + 2 * main_offset
@@ -26,9 +34,13 @@ drawing = svg.Drawing(total_width, total_height)
 drawing.setRenderSize(f"{total_width / 10}in", f"{total_height / 10}in")
 
 # draw outside border
-drawing.append(svg.Rectangle(0.5, 0.5, total_width - 1, total_height - 1, stroke_width=1, stroke="#666666", fill="#ffffff"))
+drawing.append(svg.Rectangle(outer_border/2, outer_border/2,
+                             total_width - outer_border, total_height - outer_border,
+                             stroke_width=outer_border, stroke="#666666", fill="#ffffff"))
 # draw inside border
-drawing.append(svg.Rectangle(main_offset - 1.5, main_offset - 1.5, main_width + 3, main_height + 3, stroke_width=1, stroke="#666666", fill="#ffffff"))
+drawing.append(svg.Rectangle(main_offset - inner_padding - inner_border/2, main_offset - inner_padding - inner_border/2,
+                             main_width + 2*inner_padding + inner_border, main_height + 2*inner_padding + inner_border,
+                             stroke_width=inner_border, stroke="#666666", fill="#ffffff"))
 
 
 main_group = svg.Group(transform=f"translate({main_offset}, {-main_offset})")
@@ -117,7 +129,7 @@ if not DEBUG:
     x, y = minuet_1.draw(main_rows, x + MOVEMENT_SEPARATOR, y)
 
     _, _, _, minuet_2 = parse_music(data.minuet_2)
-    x, y = minuet_2.draw(main_rows, x + MOVEMENT_SEPARATOR / 2, y)
+    x, y = minuet_2.draw(main_rows, x + MOVEMENT_SEPARATOR, y)
 
     _, _, _, gigue = parse_music(data.gigue)
     x, y = gigue.draw(main_rows, x + MOVEMENT_SEPARATOR, y)
@@ -128,7 +140,8 @@ if not DEBUG:
     for g in border_rows:
         g.center()
 
-    yardage_accumulator = defaultdict(float)
+    yardage_accumulator : typing.Dict[typing.Tuple[str, int, int], float] = defaultdict(float)
+    # yardage_accumulator: (color, octave, finished strip width) -> raw half-inches
     prelude.yardage(yardage_accumulator)
     allemande.yardage(yardage_accumulator)
     courante.yardage(yardage_accumulator)
@@ -137,59 +150,90 @@ if not DEBUG:
     minuet_2.yardage(yardage_accumulator)
     gigue.yardage(yardage_accumulator)
 
+    gray_half_inch_length = yardage_accumulator.pop((COLOR["N"], 1, 1))
+
     yardage_dict = defaultdict(dict)
-    white_dict = defaultdict(float)
+    # yardage_dict: note -> (octave, raw strip width (in half inches)) -> (raw inches, strips)
+    white_dict : typing.Dict[int, float] = defaultdict(float)
+    # white_dict: raw strip width (in half inches) -> strips needed
     white_fullheight = 0
-    for (color, octave, height), strip_units in yardage_accumulator.items():
-        num_strips = strips(strip_units/2)
+    # white_fullheight in half-inches
+    for (color, octave, height), half_inches in yardage_accumulator.items():
+        num_strips = strips(half_inches/2)
         if color == "#ffffff":
-            white_fullheight += strip_units + 1
+            white_fullheight += half_inches
         else:
-            yardage_dict[REV_COLOR[color]][octave, height] = (strip_units/2, num_strips)
+            yardage_dict[REV_COLOR[color]][octave, height + 1] = (half_inches/2, num_strips)
             white_dict[NOTE_BOTTOM[height][REV_COLOR[color], octave] + 1] += num_strips
             white_dict[ROW_HEIGHT - NOTE_BOTTOM[height][REV_COLOR[color], octave] - height + 1] += num_strips
+    with open("cutting template.txt", mode="w") as instructions:
+        print("Stripsets (raw measurements):", file=instructions)
+        for note, d in sorted(yardage_dict.items()):
+            for (octave, strip_width), (i, s) in sorted(d.items()):
+                white_below = NOTE_BOTTOM[strip_width - 1][note, octave] + 1
+                white_above = ROW_HEIGHT - NOTE_BOTTOM[strip_width - 1][note, octave] - strip_width + 2
+                if white_above > 1:
+                    print(f"{white_above/2}\" white, ", end="", file=instructions)
+                print(f"{strip_width/2}\" {note}", end="", file=instructions)
+                if white_below > 1:
+                    print(f", {white_below/2}\" white", end="", file=instructions)
+                print(f": {i}\", {s} strips", file=instructions)
+            overall_width = int(math.ceil(sum(h/2 * s for (_, h), (_, s) in d.items())))
+            print(note, overall_width / 36, "yards", file=instructions)
+            print(file=instructions)
 
-    print("Stripsets:")
-    for note, d in sorted(yardage_dict.items()):
-        for (octave, height), (i, s) in sorted(d.items()):
-            print(note, height, octave, i, s)
-        overall_width = int(math.ceil(sum((h+1)/2 * s for (_, h), (_, s) in d.items())))
-        print(note, overall_width / 36, "yards")
+        print("White strips:", file=instructions)
+        del white_dict[1] # no half-inch strips please
 
-    # print("White strips:")
-    # del white_dict[1] # no half-inch strips please
-    # # add the movement separators
-    # white_fullheight += MOVEMENT_SEPARATOR * 9 + 5
-    # # add the row separators
-    # white_dict[2] += strips((num_rows - 1) * (main_width + 2))
-    # # add the centering
-    # for row in main_rows:
-    #     white_fullheight += (row.max_width - row.right) * 2 + 6
-    # white_dict[ROW_HEIGHT + 1] = strips(white_fullheight/2)
-    # for width, s in sorted(white_dict.items()):
-    #     print(width/2, s)
-    # print(sum(width / 2 * math.ceil(s) / 36 for width, s in white_dict.items()), "yards")
+        # add the movement separators
+        white_fullheight += (MOVEMENT_SEPARATOR * 2 + 1) * 5
 
-    print("Gray strips:")
-    # gray_half_length = (num_rows - 1) * (main_width + 0.5)
-    # gray_half_strips = strips(gray_half_length)
-    gray_inch_length = 2*(main_width+2) + 2*(main_height+2) + 8
-    gray_binding_length = 2*total_width + 2*total_height + 8
-    gray_inch_strips = strips(gray_inch_length)
-    gray_binding_strips = strips(gray_binding_length)
-    # print(0.5, gray_half_strips)
-    print(1, gray_inch_strips)
-    print(2.75, gray_binding_strips)
-    # print((gray_half_strips * 0.5 + gray_inch_strips) / 36, "yards")
-    print ((gray_inch_strips * 1.5 + gray_binding_strips * 2.75) / 36, "yards")
-    print()
-    print("center amounts")
-    for i, row in enumerate(main_rows):
-        print("main", i, row.max_width, row.right, (row.max_width - row.right)/2)
-    for i, row in enumerate(border_rows):
-        print("border", i, row.max_width, row.right, (row.max_width - row.right)/2)
+        # add the row separators
+        white_dict[int(ring_spacing*2+1)] += strips(sum(row.max_width for row in main_rows))
 
-print("total size", total_width-2, total_height-2)
+        # add the centering
+        for row in main_rows + border_rows:
+            white_fullheight += (row.max_width - row.right) * 2 + 6
+
+        # add the border gap
+        white_fullheight += border_gap * 2
+
+        white_dict[ROW_HEIGHT + 1] = strips(white_fullheight/2)
+
+        # add the borders
+        white_dict[int(inner_padding*2+1)] += strips(2*main_width + 2*main_height)
+        white_dict[int(inner_margin*2+1)] += strips(2*main_width + 2*main_height + 4*inner_border + 4*inner_margin)
+        white_dict[int(outer_margin*2+1)] += strips(2*total_width + 2*total_height)
+
+        for width, s in sorted(white_dict.items()):
+            print(f"{width/2}\": {s} strips total", file=instructions)
+        print(sum((width / 2 * math.ceil(s)) / 36 for width, s in white_dict.items()), "yards", file=instructions)
+
+        print(f"Center block: {center_width} x {center_height} finished", file=instructions)
+        print(file=instructions)
+
+        print("Gray strips:", file=instructions)
+        inner_border_length = 2*(main_width+2) + 2*(main_height+2) + 8
+        binding_length = 2*total_width + 2*total_height + 8
+        center_border_length = 2*(center_width+2) + 2*(center_height+2)
+        gray_inch_strips = strips(inner_border_length + center_border_length)
+        gray_binding_strips = strips(binding_length)
+        gray_half_inch_strips = strips(gray_half_inch_length)
+        print(f"1 inch: {gray_half_inch_strips} strips", file=instructions)
+        print(f"1.5 inch: {gray_inch_strips} strips", file=instructions)
+        print(f"2.5 inch for binding: {gray_binding_strips} strips", file=instructions)
+        print ((gray_half_inch_strips + gray_inch_strips * 1.5 + gray_binding_strips * 2.75) / 36, "yards", file=instructions)
+        print(file=instructions)
+
+        print("centering amounts", file=instructions)
+        for i, row in enumerate(main_rows):
+            print(f"main row {i}: nominal width {row.max_width}; actual width {row.right}; centering needed {(row.max_width - row.right) / 2}", file=instructions)
+        for i, row in enumerate(border_rows):
+            print(f"border row {i}: nominal width {row.max_width}; actual width {row.right}; centering needed {(row.max_width - row.right) / 2}", file=instructions)
+
+        print(file=instructions)
+        print("total size", total_width- outer_border*2, total_height - outer_border*2, file=instructions)
+
 drawing.saveSvg("quilt_render3.svg")
 
 
