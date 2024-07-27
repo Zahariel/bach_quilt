@@ -1,0 +1,9 @@
+set-alias inkscape 'C:\Program Files\Inkscape\bin\inkscape.exe'
+
+dir -filter %.svg | % {
+    inkscape --export-type=pdf $_.name
+}
+
+
+
+https://acrobat.adobe.com/link/acrobat/combine-pdf?x_api_client_id=adobe_com&x_api_client_location=combine_pdf
