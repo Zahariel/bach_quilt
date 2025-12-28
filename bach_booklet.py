@@ -2,8 +2,8 @@ import math
 import os
 from collections import defaultdict
 
-import drawSvg as svg
-from music2 import NOTE_BOTTOM, REV_COLOR, ROW_HEIGHT, parse_music, MusicRow
+import drawsvg as svg
+from music2 import NOTE_TOP, REV_COLOR, ROW_HEIGHT, parse_music, MusicRow
 import data
 
 
@@ -16,10 +16,10 @@ blocks_height = 10 / BLOCKS_SCALE
 NUM_PAGES = 25
 for page in range(NUM_PAGES):
     page_drawing = svg.Drawing(8/BLOCKS_SCALE, blocks_height, origin=(-1, 0))
-    page_drawing.setRenderSize("8in", "10in")
+    page_drawing.set_render_size("8in", "10in")
     page_drawing.append(svg.Rectangle(-1, 0, 8/BLOCKS_SCALE, blocks_height, fill="#ffffff", stroke="#000000", stroke_width=0.1))
     pages.append(page_drawing)
-    page_rows = [MusicRow(svg.Group(), blocks_width, i * 6 - blocks_height + 10) for i in range(BLOCKS_ROWS_PER_PAGE)]
+    page_rows = [MusicRow(svg.Group(), blocks_width, i * 6 + 5) for i in range(BLOCKS_ROWS_PER_PAGE)]
     blocks_rows += page_rows
     for r in page_rows:
         page_drawing.append(r.group)
@@ -30,7 +30,7 @@ def draw_movement(music, page, name):
     if y % BLOCKS_ROWS_PER_PAGE == 0 and x == 0:
         last_page -= 1
     for p in range(page, last_page + 1):
-        pages[p].append(svg.Text(f"{name} (Page {p - page +1})", 2, 4/BLOCKS_SCALE-1, blocks_height - 2, center=True))
+        pages[p].append(svg.Text(f"{name} (Page {p - page +1})", 2, 4/BLOCKS_SCALE-1, 2, center=True))
     return last_page + 1
 
 _, _, _, prelude = parse_music(data.prelude)
@@ -57,5 +57,5 @@ page = draw_movement(gigue, page, "Gigue")
 
 os.makedirs("blocks", exist_ok=True)
 for i, page in enumerate(pages):
-    page.saveSvg(f"blocks/page{i+1:03}.svg")
+    page.save_svg(f"blocks/page{i+1:03}.svg")
 

@@ -2,8 +2,8 @@ import math
 import typing
 from collections import defaultdict
 
-import drawSvg as svg
-from music2 import COLOR, NOTE_BOTTOM, REV_COLOR, ROW_HEIGHT, parse_music, MusicRow
+import drawsvg as svg
+from music2 import COLOR, NOTE_TOP, REV_COLOR, ROW_HEIGHT, parse_music, MusicRow
 import data
 
 DEBUG=False
@@ -21,17 +21,17 @@ inner_padding = 1
 inner_border = 1
 inner_margin = 1
 border_row_height = ROW_HEIGHT//2
-outer_margin = 1.5
+outer_padding = 1.5
 outer_border = 1
 
 # padding, border 1, margin, main border, margin, border 2
-main_offset = (inner_padding + inner_border + inner_margin + border_row_height + outer_margin + outer_border)
+main_offset = (inner_padding + inner_border + inner_margin + border_row_height + outer_padding + outer_border)
 
 total_width = main_width + 2 * main_offset
 total_height = main_height + 2 * main_offset
 
 drawing = svg.Drawing(total_width, total_height)
-drawing.setRenderSize(f"{total_width / 10}in", f"{total_height / 10}in")
+drawing.set_render_size(f"{total_width / 10}in", f"{total_height / 10}in")
 
 # draw outside border
 drawing.append(svg.Rectangle(outer_border/2, outer_border/2,
@@ -43,7 +43,7 @@ drawing.append(svg.Rectangle(main_offset - inner_padding - inner_border/2, main_
                              stroke_width=inner_border, stroke="#666666", fill="#ffffff"))
 
 
-main_group = svg.Group(transform=f"translate({main_offset}, {-main_offset})")
+main_group = svg.Group(transform=f"translate({main_offset}, {main_offset})")
 drawing.append(main_group)
 
 main_group.append(svg.Rectangle((5+ring_spacing) * rings + 0.5, (5+ring_spacing) * rings + 0.5, center_width - 1, center_height - 1, stroke_width=1, stroke="#666666", fill="#ffffff"))
@@ -52,37 +52,34 @@ main_rows = []
 
 for i in range(rings):
     if i == 0:
-        top, top_width = svg.Group(transform=f"translate({i * (5+ring_spacing)},{i * (5+ring_spacing) - main_height + 5})"), main_width - i * 2 * (5+ring_spacing) - (5+ring_spacing)
+        top, top_width = svg.Group(transform=f"translate({i * (5+ring_spacing)},{i * (5+ring_spacing)})"), main_width - i * 2 * (5+ring_spacing) - (5+ring_spacing)
     else:
-        top, top_width = svg.Group(transform=f"translate({i * (5+ring_spacing) - (5+ring_spacing)},{i * (5+ring_spacing) - main_height + 5})"), main_width - i * 2 * (5+ring_spacing)
-    right, right_width = svg.Group(transform=f"translate({main_width - 5 - i * (5+ring_spacing)},{i * (5+ring_spacing) - main_height}) rotate(90)"), main_height - i * 2 * (5+ring_spacing) - (5+ring_spacing)
-    bottom, bottom_width = svg.Group(transform=f"translate({main_width - i * (5+ring_spacing)},{-5 - i * (5+ring_spacing)}) rotate(180)"), main_width - i * 2 * (5+ring_spacing) - (5+ring_spacing)
+        top, top_width = svg.Group(transform=f"translate({i * (5+ring_spacing) - (5+ring_spacing)},{i * (5+ring_spacing)})"), main_width - i * 2 * (5+ring_spacing)
+    right, right_width = svg.Group(transform=f"translate({main_width - i * (5+ring_spacing)},{i * (5+ring_spacing)}) rotate(90)"), main_height - i * 2 * (5+ring_spacing) - (5+ring_spacing)
+    bottom, bottom_width = svg.Group(transform=f"translate({main_width - i * (5+ring_spacing)},{main_height - i * (5+ring_spacing)}) rotate(180)"), main_width - i * 2 * (5+ring_spacing) - (5+ring_spacing)
     if i == rings - 1:
-        left, left_width = svg.Group(transform=f"translate({5 + i * (5+ring_spacing)},{-i * (5+ring_spacing)}) rotate(270)"), main_height - i * 2 * (5+ring_spacing) - (5+ring_spacing)
+        left, left_width = svg.Group(transform=f"translate({i * (5+ring_spacing)},{main_height - i * (5+ring_spacing)}) rotate(270)"), main_height - i * 2 * (5+ring_spacing) - (5+ring_spacing)
     else:
-        left, left_width = svg.Group(transform=f"translate({5 + i * (5+ring_spacing)},{-i * (5+ring_spacing)}) rotate(270)"), main_height - i * 2 * (5+ring_spacing) - 2 * (5+ring_spacing)
+        left, left_width = svg.Group(transform=f"translate({i * (5+ring_spacing)},{main_height - i * (5+ring_spacing)}) rotate(270)"), main_height - i * 2 * (5+ring_spacing) - 2 * (5+ring_spacing)
 
-    for g, w in [(top, top_width), (right, right_width), (bottom, bottom_width), (left, left_width)]:
+    for id, g, w in [("T", top, top_width), ("R", right, right_width), ("B", bottom, bottom_width), ("L", left, left_width)]:
         main_group.append(g)
         inner = svg.Group()
         g.append(inner)
         main_rows.append(MusicRow(inner, w, 0))
         if DEBUG:
             inner.append(svg.Rectangle(.25, .25, w - 0.5, 4.5, stroke_width=.5, stroke="#ff0000", fill="#ffffff"))
-            inner.append(svg.Text(str(i), 1, 1, 2))
+            inner.append(svg.Text(f"{id}{i}", 1, 1, 2))
 
-
-# for i in range(1,num_rows):
-#     main_group.append(svg.Rectangle(0, i*5.5-0.5, main_width, 0.5, fill="#666666"))
 
 border_gap = 8
 
 border_groups = [
-    (svg.Group(transform=f"translate({main_offset + (main_width + border_gap)/2},{7.5-total_height})"), (main_width+4 - border_gap)/2),
-    (svg.Group(transform=f"translate({total_width - main_offset + 3},{main_offset - total_height - 2}) rotate(90)"), main_height+4),
-    (svg.Group(transform=f"translate({total_width - main_offset + 2},{-main_offset + 3}) rotate(180)"), main_width+4),
-    (svg.Group(transform=f"translate({main_offset - 3},{2 - main_offset}) rotate(270)"), main_height+4),
-    (svg.Group(transform=f"translate({main_offset - 2},{7.5-total_height})"), (main_width+4 - border_gap)/2),
+    (svg.Group(transform=f"translate({main_offset + (main_width + border_gap)/2},{outer_border + outer_padding})"), (main_width + 2 * (inner_padding + inner_border) - border_gap) / 2),
+    (svg.Group(transform=f"translate({total_width - outer_border - outer_padding},{main_offset - inner_border - inner_padding}) rotate(90)"), main_height + 2 * (inner_padding + inner_border)),
+    (svg.Group(transform=f"translate({total_width - main_offset + inner_border + inner_padding},{total_height - outer_border - outer_padding}) rotate(180)"), main_width + 2 * (inner_padding + inner_border)),
+    (svg.Group(transform=f"translate({outer_border + outer_padding},{total_height - main_offset + inner_border + inner_padding}) rotate(270)"), main_height + 2 * (inner_padding + inner_border)),
+    (svg.Group(transform=f"translate({main_offset - inner_padding - inner_border},{outer_border + outer_padding})"), (main_width + 2 * (inner_padding + inner_border) - border_gap) / 2),
 ]
 
 border_rows = []
@@ -164,14 +161,14 @@ if not DEBUG:
             white_fullheight += half_inches
         else:
             yardage_dict[REV_COLOR[color]][octave, height + 1] = (half_inches/2, num_strips)
-            white_dict[NOTE_BOTTOM[height][REV_COLOR[color], octave] + 1] += num_strips
-            white_dict[ROW_HEIGHT - NOTE_BOTTOM[height][REV_COLOR[color], octave] - height + 1] += num_strips
+            white_dict[NOTE_TOP[height][REV_COLOR[color], octave] + 1] += num_strips
+            white_dict[ROW_HEIGHT - NOTE_TOP[height][REV_COLOR[color], octave] - height + 1] += num_strips
     with open("cutting template.txt", mode="w") as instructions:
         print("Stripsets (raw measurements):", file=instructions)
         for note, d in sorted(yardage_dict.items()):
             for (octave, strip_width), (i, s) in sorted(d.items()):
-                white_below = NOTE_BOTTOM[strip_width - 1][note, octave] + 1
-                white_above = ROW_HEIGHT - NOTE_BOTTOM[strip_width - 1][note, octave] - strip_width + 2
+                white_above = NOTE_TOP[strip_width - 1][note, octave] + 1
+                white_below = ROW_HEIGHT - NOTE_TOP[strip_width - 1][note, octave] - strip_width + 2
                 if white_above > 1:
                     print(f"{white_above/2}\" white, ", end="", file=instructions)
                 print(f"{strip_width/2}\" {note}", end="", file=instructions)
@@ -182,29 +179,45 @@ if not DEBUG:
             print(note, overall_width / 36, "yards", file=instructions)
             print(file=instructions)
 
-        print("White strips:", file=instructions)
-        del white_dict[1] # no half-inch strips please
+        # add the row separators
+        row_spacing_strips = strips(sum(row.max_width for row in main_rows))
+        print(f"Between rows (1\" white): {row_spacing_strips} strips", file=instructions)
+        white_dict[int(ring_spacing*2+1)] += row_spacing_strips
 
         # add the movement separators
-        white_fullheight += (MOVEMENT_SEPARATOR * 2 + 1) * 5
-
-        # add the row separators
-        white_dict[int(ring_spacing*2+1)] += strips(sum(row.max_width for row in main_rows))
+        movement_separator_size = (MOVEMENT_SEPARATOR * 2 + 1) * 5
+        print(f"Between movements (5.5\" white): {movement_separator_size/2}\"", file=instructions)
+        white_fullheight += movement_separator_size
 
         # add the centering
+        centering = 0
         for row in main_rows + border_rows:
-            white_fullheight += (row.max_width - row.right) * 2 + 6
+            centering += (row.max_width - row.right) * 2 + 6
+        print(f"centering (5.5\" white): {centering/2}\"", file=instructions)
+        white_fullheight += centering
 
         # add the border gap
+        print(f"border gap (5.5\" white): {border_gap * 2}\"", file=instructions)
         white_fullheight += border_gap * 2
 
         white_dict[ROW_HEIGHT + 1] = strips(white_fullheight/2)
 
         # add the borders
-        white_dict[int(inner_padding*2+1)] += strips(2*main_width + 2*main_height)
-        white_dict[int(inner_margin*2+1)] += strips(2*main_width + 2*main_height + 4*inner_border + 4*inner_margin)
-        white_dict[int(outer_margin*2+1)] += strips(2*total_width + 2*total_height)
+        inner_padding_strips = strips(2 * main_width + 2 * main_height)
+        print(f"inner padding ({inner_padding + 0.5}\" white): {inner_padding_strips} strips", file=instructions)
+        white_dict[int(inner_padding*2+1)] += inner_padding_strips
 
+        inner_margin_strips = strips(2 * main_width + 2 * main_height + 4 * inner_border + 4 * inner_margin)
+        print(f"inner margin ({inner_margin + 0.5}\" white): {inner_margin_strips} strips", file=instructions)
+        white_dict[int(inner_margin*2+1)] += inner_margin_strips
+
+        outer_padding_strips = strips(2 * total_width + 2 * total_height)
+        print(f"outer padding ({outer_padding + 0.5}\" white): {outer_padding_strips} strips", file=instructions)
+        white_dict[int(outer_padding * 2 + 1)] += outer_padding_strips
+
+        del white_dict[1] # no half-inch strips please
+
+        print("Total white strips:", file=instructions)
         for width, s in sorted(white_dict.items()):
             print(f"{width/2}\": {s} strips total", file=instructions)
         print(sum((width / 2 * math.ceil(s)) / 36 for width, s in white_dict.items()), "yards", file=instructions)
@@ -222,7 +235,7 @@ if not DEBUG:
         print(f"1 inch: {gray_half_inch_strips} strips", file=instructions)
         print(f"1.5 inch: {gray_inch_strips} strips", file=instructions)
         print(f"2.5 inch for binding: {gray_binding_strips} strips", file=instructions)
-        print ((gray_half_inch_strips + gray_inch_strips * 1.5 + gray_binding_strips * 2.75) / 36, "yards", file=instructions)
+        print((gray_half_inch_strips + gray_inch_strips * 1.5 + gray_binding_strips * 2.75) / 36, "yards", file=instructions)
         print(file=instructions)
 
         print("centering amounts", file=instructions)
@@ -234,6 +247,4 @@ if not DEBUG:
         print(file=instructions)
         print("total size", total_width- outer_border*2, total_height - outer_border*2, file=instructions)
 
-drawing.saveSvg("quilt_render3.svg")
-
-
+drawing.save_svg("quilt_render3.svg")

@@ -1,0 +1,10 @@
+[project]
+name = "bach-quilt"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.12"
+dependencies = [
+    "drawsvg>=2.4.0",
+    "pip>=25.3",
+    "uv>=0.9.18",
+]
