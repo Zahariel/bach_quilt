@@ -4,6 +4,7 @@
     <exclude-output />
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/.venv" />
+      <excludeFolder url="file://$MODULE_DIR$/blocks" />
       <excludeFolder url="file://$MODULE_DIR$/blocks_saved" />
     </content>
     <orderEntry type="inheritedJdk" />
