@@ -459,7 +459,7 @@ class Note(Drawable):
 
     def draw(self, rows:typing.Sequence[MusicRow], x, row, *, scale=DEFAULT_SCALE, measure_border=None, **kwargs):
         if self.pitch != "R":
-            dy = self.top_y() * scale
+            dy = NOTE_TOP[self.height][self.pitch, self.octave] * scale
             rect = svg.Rectangle(x, dy, self.duration * scale, self.height * scale, fill=COLOR[self.pitch])
             rows[row].group.append(rect)
             rows[row].right = x + self.duration * scale
@@ -532,7 +532,7 @@ class BarLine(Drawable):
 TIME_BARS = {
     1: [[(3,4)]],
     2: [[(0,3), (7,3)]],
-    3: [[(2,1), (5,1), (8,1)]],
+    3: [[(1,1), (4,1), (7,1)]],
     4: [[(0,1), (3,1), (6,1), (9,1)]],
     6: [[(2,1), (7,1)], [(1,1), (8,1)], [(2,1), (7,1)]]
 }
@@ -617,7 +617,7 @@ class Trill(Note):
         second_top = super(Trill, self).top_y()
         for dx in range(self.duration):
             for dy in range(self.height):
-                if (dx + dy) % 2 != (self.height) % 2 or (dy == self.height-1 and first_top != second_top):
+                if (dx + dy) % 2 != (self.height) % 2 or (dy == 0 and first_top != second_top):
                     rows[row].group.append(svg.Rectangle(x + dx*scale, (first_top + dy)*scale, scale, scale, fill=COLOR[self.first]))
         return new_x, new_row
 
